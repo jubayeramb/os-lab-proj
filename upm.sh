@@ -1,5 +1,25 @@
 #!/bin/bash
 
+# detect the distribution name
+detect_distribution() {
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        echo "$(echo "$NAME" | sed -e 's/[^[:alnum:]]\+//g' -e 's/\b\(.\)/\u\1/g')"
+    elif command -v lsb_release &> /dev/null; then
+        echo "$(lsb_release -si | sed -e 's/[^[:alnum:]]\+//g' -e 's/\b\(.\)/\u\1/g')"
+    elif [ -f /etc/debian_version ]; then
+        echo "Debian"
+    elif [ -f /etc/redhat-release ]; then
+        echo "RedHat"
+    elif [ -f /etc/arch-release ]; then
+        echo "ArchLinux"
+    else
+        echo "-1"
+    fi
+}
+
+distribution=$(detect_distribution)
+
 # Define the path to the JSON file containing the install commands
 JSON_FILE="commands.json"
 
@@ -20,18 +40,24 @@ install_app() {
 
 # Main function
 main() {
-    if [ $# -ne 3 ]; then
-        echo "Usage: $0 install <app_name> <distro>"
+    if [ $# -ne 2 ]; then
+        echo "Usage: $0 install <app_name>"
         exit 1
     fi
 
     local action="$1"
     local app_name="$2"
-    local distro="$3"
+    local distro="$distribution"
 
     if [ "$action" != "install" ]; then
         echo "Error: Unknown action $action"
         exit 1
+    fi
+
+    # if the distribution is not detected, ask the user to provide it
+    if [ "$distro" == "-1" ]; then
+        echo "Error: Could not detect the distribution. Please provide the distribution name."
+        read -p "Distribution: " distro
     fi
 
     install_app "$app_name" "$distro"
