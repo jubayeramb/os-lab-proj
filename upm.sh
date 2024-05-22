@@ -60,6 +60,27 @@ main() {
         read -p "Distribution: " distro
     fi
 
+    # check if the jq command is installed; if not, install it
+    if ! command -v jq &> /dev/null; then
+        echo "jq is not installed. Installing..."
+        case "$distro" in
+            Debian|Ubuntu)
+                sudo apt update
+                sudo apt install -y jq
+                ;;
+            Fedora|Red\ Hat|CentOS)
+                sudo yum install -y jq
+                ;;
+            Arch\ Linux)
+                sudo pacman -Sy jq
+                ;;
+            *)
+                echo "Error: Unsupported distribution $distro"
+                exit 1
+                ;;
+        esac
+    fi
+
     install_app "$app_name" "$distro"
 }
 
