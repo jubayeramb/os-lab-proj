@@ -1,8 +1,8 @@
 Usage: upm [operation] [name]
 
 Operation
-  install                     install apps
-  uninstall                   uninstall apps
+  install <app_name>          install apps
+  uninstall <app_name>        uninstall apps
   list                        show app list
   
 Options:
